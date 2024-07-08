@@ -28,24 +28,33 @@ static int hh_finish(struct zebra_dplane_provider *prov,bool early){
 static int hh_process_update(struct zebra_dplane_ctx *ctx){
     switch (dplane_ctx_get_op(ctx)) {
     case DPLANE_OP_ROUTE_INSTALL:
+    zlog_info("Dplane OP route installation");
     break;
 	case DPLANE_OP_ROUTE_UPDATE:
+    zlog_info("Dplane OP route update");
     break;
 	case DPLANE_OP_ROUTE_DELETE:
+    zlog_info("Dplane OP route delete");
     break;
 	case DPLANE_OP_ROUTE_NOTIFY:
+    zlog_info("Dplane OP route notify");
     break;
 
 	/* Nexthop update */
 	case DPLANE_OP_NH_INSTALL:
+    zlog_info("Dplane OP NH install");
     break;
-	case DPLANE_OP_NH_UPDATE:
+    case DPLANE_OP_NH_UPDATE:
+    zlog_info("Dplane OP NH update");
     break;
 	case DPLANE_OP_NH_DELETE:
+    zlog_info("Dplane OP NH delete");
     break;
     case DPLANE_OP_SYS_ROUTE_ADD:
+    zlog_info("Dplane OP sys route add");
     break;
 	case DPLANE_OP_SYS_ROUTE_DELETE:
+    zlog_info("Dplane OP sys route delete");
     break;
 
 	/* Interface address update */
@@ -67,8 +76,10 @@ static int hh_process_update(struct zebra_dplane_ctx *ctx){
     zlog_info("EVPN neighbor Install");
     break;
 	case DPLANE_OP_NEIGH_UPDATE:
+    zlog_info("Dplane Neigh Update");
     break;
 	case DPLANE_OP_NEIGH_DELETE:
+    zlog_info("Dplane Neigh Delete");
     break;
 
 	/* EVPN VTEP updates */
@@ -82,15 +93,25 @@ static int hh_process_update(struct zebra_dplane_ctx *ctx){
     case DPLANE_OP_BR_PORT_UPDATE:
         break;
     case DPLANE_OP_INTF_ADDR_ADD:
+    zlog_info("Dplane OP Interface Address Add");
+    break;
 	case DPLANE_OP_INTF_ADDR_DEL:
-
+    zlog_info("Dplane OP Interface Address Del");
+    break;
 	/* Incoming interface config events */
 	case DPLANE_OP_INTF_NETCONFIG:
-
+    zlog_info("Dplane OP Interface NetConfig");
+    break;
 	/* Interface update */
 	case DPLANE_OP_INTF_INSTALL:
+    zlog_info("Dplane OP Interface Install");
+    break;
 	case DPLANE_OP_INTF_UPDATE:
+    zlog_info("Dplane OP Interface Update");
+    break;
 	case DPLANE_OP_INTF_DELETE:
+    zlog_info("Dplane OP Interface Delete");
+    break;
     default:
         zlog_debug("Received unhandled OP %d",dplane_ctx_get_op(ctx));
     }
@@ -109,6 +130,9 @@ static int hh_process(struct zebra_dplane_provider *prov){
 		if (!ctx)
 			break;
         int status = hh_process_update(ctx);
+        dplane_ctx_set_status(ctx, ZEBRA_DPLANE_REQUEST_SUCCESS);
+		dplane_provider_enqueue_out_ctx(prov, ctx);
+
     }
     return 0;
 }
@@ -122,7 +146,7 @@ static int init_hh_plugin(struct event_loop *tm){
     hh_finish,
     data,
     &prov_p);
-    if (ret < 0) {
+    if (ret < 0) {  
         zlog_debug("Provider registration failed %d",ret);
         return ret;
     }   
