@@ -28,7 +28,9 @@ static int hh_finish(struct zebra_dplane_provider *prov,bool early){
 static int hh_process_update(struct zebra_dplane_ctx *ctx){
     switch (dplane_ctx_get_op(ctx)) {
     case DPLANE_OP_ROUTE_INSTALL:
-    zlog_info("Dplane OP route installation");
+    afi_t afi = dplane_ctx_get_afi(ctx);
+
+    zlog_info("Dplane OP route installation %s",afi2str(afi));
     break;
 	case DPLANE_OP_ROUTE_UPDATE:
     zlog_info("Dplane OP route update");
